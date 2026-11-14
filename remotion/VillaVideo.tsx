@@ -43,7 +43,14 @@ const ClipView: React.FC<{
           vignette={theme.vignette + 0.15}
           camera={applyFx({...cam, exposure}, fx)}
         />
-        <IntroTitle frame={frame} duration={dur} villaName={props.villaName} location={props.location} theme={theme} styleId={styleId} />
+        <AbsoluteFill
+          style={{
+            transform: `translateX(${-fx.offsetX * width}px) scale(${fx.zoomMul})`,
+            filter: Math.abs(fx.blurX) + fx.radial > 0.002 ? `blur(${Math.min(30, Math.abs(fx.blurX) * 90 + fx.radial * 50)}px)` : undefined,
+          }}
+        >
+          <IntroTitle frame={frame} duration={dur} villaName={props.villaName} location={props.location} theme={theme} styleId={styleId} />
+        </AbsoluteFill>
         <LightLeak intensity={Math.max(fx.leak, interpolate(frame, [6, 26, 50], [0, 0.35, 0], clamp))} seed={clipIndex} />
       </AbsoluteFill>
     );

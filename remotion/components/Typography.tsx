@@ -124,7 +124,7 @@ export const ChapterTitle: React.FC<{
         <div style={{position: 'absolute', left: 110, bottom, display: 'flex', alignItems: 'flex-end', gap: 26}}>
           <div style={{width: 10, height: 120 * rule, background: COLORS.gold}} />
           <div>
-            <div style={{fontFamily: 'Montserrat', fontWeight: 600, fontSize: 22, letterSpacing: '0.3em', color: COLORS.gold, marginBottom: 6, opacity: rule, textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 2px 18px rgba(0,0,0,0.7)'}}>{num}</div>
+            <div style={{fontFamily: 'Montserrat', fontWeight: 600, fontSize: 26, letterSpacing: '0.3em', color: COLORS.gold, marginBottom: 10, opacity: rule, textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 2px 18px rgba(0,0,0,0.7)'}}>{num}</div>
             <MaskedLetters
               text={title}
               frame={frame}

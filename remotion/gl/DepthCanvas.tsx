@@ -87,9 +87,11 @@ void main() {
   vec3 col = vec3(0.0);
   float blurLen = length(uBlur) + uRadial;
   if (blurLen > 0.0005) {
-    const int N = 18;
+    const int N = 28;
+    // Tramage par pixel : le flou devient un filé continu au lieu de copies en escalier.
+    float jitter = hash(vUv * uRes + 7.31) - 0.5;
     for (int i = 0; i < N; i++) {
-      float t = float(i) / float(N - 1) - 0.5;
+      float t = (float(i) + 0.5 + jitter) / float(N) - 0.5;
       vec2 pp = p + uBlur * t + (p - 0.5) * uRadial * t;
       col += shade(pp);
     }
