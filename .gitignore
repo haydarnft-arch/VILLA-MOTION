@@ -3,3 +3,4 @@ projects/
 .cache/
 *.log
 samples/
+models/

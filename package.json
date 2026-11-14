@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server/index.js",
-    "studio": "npx remotion studio remotion/index.ts"
+    "studio": "npx remotion studio remotion/index.ts",
+    "postinstall": "node scripts/fetch-model.mjs"
   },
   "repository": {
     "type": "git",
@@ -23,11 +24,15 @@
   "dependencies": {
     "@remotion/bundler": "^4.0.543",
     "@remotion/renderer": "^4.0.543",
-    "@remotion/transitions": "^4.0.543",
     "express": "^5.3.0",
     "multer": "^2.5.0",
+    "onnxruntime-node": "^1.31.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "remotion": "^4.0.543"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.31",
+    "typescript": "^5.6.3"
   }
 }

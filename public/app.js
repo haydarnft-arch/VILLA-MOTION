@@ -122,24 +122,20 @@ const renderEditor = () => {
 };
 
 const updateSpecs = () => {
-  // Estimation du nombre de scènes photo, miroir du calcul Remotion.
-  const T = {luxury: [4.2, 4.6, 3.4, 1.0], cinematic: [4.4, 4.8, 3.1, 0.9], modern: [3.8, 4.2, 2.7, 0.6]}[project.styleId];
-  const [intro, outro, base, trans] = T;
-  const total = project.durationSeconds;
-  let n = Math.max(1, Math.round((total - intro - outro + trans) / (base - trans)));
-  n = Math.min(n, Math.max(1, project.photos.length));
-  $('#spec-scenes').textContent = project.photos.length
-    ? `Intro · ${n} tableau${n > 1 ? 'x' : ''} · Finale`
+  const n = project.photos.length;
+  const rooms = new Set(project.photos.map((p) => (p.label || '').trim().toLowerCase()).filter(Boolean)).size;
+  $('#spec-scenes').textContent = n
+    ? `${n} photo${n > 1 ? 's' : ''}${rooms ? ` · ${rooms} pièce${rooms > 1 ? 's' : ''}` : ''}`
     : '—';
   const warnEl = $('#photo-warning');
-  if (project.photos.length === 0) {
+  if (n === 0) {
     warnEl.hidden = true;
-  } else if (project.photos.length < config.recommendedMin) {
+  } else if (n < config.recommendedMin) {
     warnEl.hidden = false;
-    warnEl.textContent = `Conseil : importez au moins ${config.recommendedMin} photos pour un film riche (actuellement ${project.photos.length}).`;
+    warnEl.textContent = `Conseil : 20 photos ou plus donnent un montage plus riche (actuellement ${n}). Ajoutez un libellé de pièce sur les photos pour obtenir des titres de chapitres.`;
   } else {
     warnEl.hidden = false;
-    warnEl.textContent = `Selon la durée choisie, ${n} photographies seront mises en scène, réparties harmonieusement sur votre ordre.`;
+    warnEl.textContent = 'Le montage se cale sur la musique : les photos sont réparties par pièce, dans votre ordre, selon la durée choisie.';
   }
 };
 
@@ -301,6 +297,7 @@ const renderPhotoGrid = () => {
 // ---------- rendu ----------
 const STATE_LABELS = {
   starting: 'Initialisation…',
+  depth: 'Analyse 3D des photos…',
   bundling: 'Préparation du moteur…',
   preparing: 'Composition des scènes…',
   rendering: 'Rendu du film',
@@ -341,7 +338,7 @@ const startStatusPolling = () => {
       const s = await api(`/api/projects/${project.id}/render/status`);
       const running = s.running;
       $('#btn-render').disabled = running;
-      if (running || ['starting', 'bundling', 'preparing', 'rendering'].includes(s.state)) {
+      if (running || ['starting', 'depth', 'bundling', 'preparing', 'rendering'].includes(s.state)) {
         $('#render-progress').hidden = false;
         const pct = Math.round((s.progress || 0) * 100);
         $('#progress-bar').style.width = `${s.state === 'rendering' ? pct : Math.min(pct, 12)}%`;

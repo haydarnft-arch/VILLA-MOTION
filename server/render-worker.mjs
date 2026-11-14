@@ -8,6 +8,7 @@ import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {bundle} from '@remotion/bundler';
 import {renderMedia, selectComposition, ensureBrowser} from '@remotion/renderer';
+import {generateDepth} from './depth.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -25,7 +26,9 @@ if (!jobFile) {
   process.exit(2);
 }
 const job = JSON.parse(fs.readFileSync(jobFile, 'utf8'));
-const {statusPath, outPath, inputProps} = job;
+const {statusPath, outPath, inputProps, depthJobs = []} = job;
+// WebGL logiciel (SwiftShader) : fonctionne sur toute machine, même sans carte graphique.
+const CHROMIUM_OPTIONS = {gl: 'swangle'};
 
 let lastWrite = 0;
 const writeStatus = (data, force = false) => {
@@ -79,6 +82,26 @@ const main = async () => {
   const startedAt = Date.now();
   writeStatus({state: 'starting', progress: 0, startedAt}, true);
 
+  const missing = depthJobs.filter((d) => !fs.existsSync(d.out));
+  for (let i = 0; i < missing.length; i++) {
+    writeStatus({state: 'depth', progress: i / missing.length, startedAt}, true);
+    try {
+      await generateDepth(missing[i].src, missing[i].out);
+    } catch (err) {
+      console.error('Profondeur impossible :', err.message);
+    }
+  }
+  // Une carte absente ne bloque pas le rendu : le plan reste en mouvement 2D.
+  for (const ph of inputProps.photos) {
+    const job = depthJobs.find((d) => ph.depth && ph.depth.endsWith(path.basename(d.out)));
+    if (job && !fs.existsSync(job.out)) delete ph.depth;
+    if (job) {
+      try {
+        Object.assign(ph, JSON.parse(fs.readFileSync(job.out.replace(/\.png$/, '.json'), 'utf8')));
+      } catch {}
+    }
+  }
+
   await ensureBrowser({browserExecutable: CHROMIUM});
   const serveUrl = await getBundle();
 
@@ -88,6 +111,7 @@ const main = async () => {
     id: 'VillaMotion',
     inputProps,
     browserExecutable: CHROMIUM,
+    chromiumOptions: CHROMIUM_OPTIONS,
     timeoutInMilliseconds: 120000,
   });
 
@@ -101,7 +125,8 @@ const main = async () => {
     inputProps,
     browserExecutable: CHROMIUM,
     timeoutInMilliseconds: 120000,
-    concurrency: Math.min(6, Math.max(2, os.cpus().length - 1)),
+    chromiumOptions: CHROMIUM_OPTIONS,
+    concurrency: Math.min(6, Math.max(1, os.cpus().length)),
     onProgress: ({progress}) => {
       writeStatus({state: 'rendering', progress, startedAt});
     },

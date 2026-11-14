@@ -12,6 +12,7 @@ const defaultProps: VillaProps = {
   durationSeconds: 36,
   photos: [],
   serverBase: 'http://127.0.0.1:4680',
+  beats: [],
 };
 
 export const RemotionRoot: React.FC = () => {

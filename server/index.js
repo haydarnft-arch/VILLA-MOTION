@@ -6,6 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {spawn, execFile} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {generateDepth, depthAvailable} from './depth.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
@@ -22,6 +23,25 @@ const id = () => crypto.randomBytes(8).toString('hex');
 const projectDir = (pid) => path.join(PROJECTS_DIR, pid);
 const projectFile = (pid) => path.join(projectDir(pid), 'project.json');
 const safeId = (s) => typeof s === 'string' && /^[a-f0-9]{16}$/.test(s);
+const depthName = (file) => file.replace(/\.[a-z0-9]+$/i, '.depth.png');
+const photoPath = (pid, file) => path.join(projectDir(pid), 'photos', file);
+
+// Cartes de profondeur calculées en arrière-plan dès l'import (une à la fois).
+let depthChain = Promise.resolve();
+const queueDepth = (pid, file) => {
+  if (!depthAvailable()) return depthChain;
+  depthChain = depthChain.then(async () => {
+    const src = photoPath(pid, file);
+    const out = photoPath(pid, depthName(file));
+    if (!fs.existsSync(src) || fs.existsSync(out)) return;
+    try {
+      await generateDepth(src, out);
+    } catch (err) {
+      console.error('Profondeur impossible pour', file, err.message);
+    }
+  });
+  return depthChain;
+};
 
 const readProject = (pid) => {
   if (!safeId(pid)) return null;
@@ -54,12 +74,17 @@ const publicProject = (p) => ({
 });
 
 // ---------- static ----------
+// Le moteur de rendu lit les photos depuis une autre origine (textures WebGL).
+app.use(['/assets', '/media'], (_req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+});
 app.use('/assets', express.static(path.join(ROOT, 'assets'), {maxAge: '1d'}));
 app.use(express.static(path.join(ROOT, 'public')));
 
 app.get('/media/:pid/:file', (req, res) => {
   const {pid, file} = req.params;
-  if (!safeId(pid) || !/^[a-f0-9]{16}\.(jpg|jpeg|png|webp)$/i.test(file)) {
+  if (!safeId(pid) || !/^[a-f0-9]{16}(\.depth)?\.(jpg|jpeg|png|webp)$/i.test(file)) {
     return res.status(400).end();
   }
   res.sendFile(path.join(projectDir(pid), 'photos', file), {maxAge: '1d'});
@@ -175,7 +200,8 @@ const upload = multer({
   },
 });
 
-// Downscale very large photos so rendering stays fast.
+// Taille de travail homogène : les très grandes photos sont réduites (rendu rapide),
+// les petites agrandies proprement (Lanczos + accentuation légère) pour le Full HD.
 const normalizePhoto = (filePath) =>
   new Promise((resolve) => {
     execFile(
@@ -183,17 +209,14 @@ const normalizePhoto = (filePath) =>
       ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width', '-of', 'csv=p=0', filePath],
       (err, stdout) => {
         const width = Number(String(stdout).trim());
-        if (err || !width || width <= 2560) return resolve();
-        const tmp = `${filePath}.tmp.jpg`;
-        execFile(
-          'ffmpeg',
-          ['-y', '-v', 'error', '-i', filePath, '-vf', 'scale=2560:-2', '-q:v', '2', tmp],
-          (err2) => {
-            if (!err2 && fs.existsSync(tmp)) fs.renameSync(tmp, filePath);
-            else fs.rmSync(tmp, {force: true});
-            resolve();
-          }
-        );
+        if (err || !width || (width >= 1920 && width <= 2560)) return resolve();
+        const vf = width > 2560 ? 'scale=2560:-2:flags=lanczos' : 'scale=2560:-2:flags=lanczos,unsharp=5:5:0.55:5:5:0';
+        const tmp = `${filePath}.tmp${path.extname(filePath)}`;
+        execFile('ffmpeg', ['-y', '-v', 'error', '-i', filePath, '-vf', vf, '-q:v', '2', tmp], (err2) => {
+          if (!err2 && fs.existsSync(tmp)) fs.renameSync(tmp, filePath);
+          else fs.rmSync(tmp, {force: true});
+          resolve();
+        });
       }
     );
   });
@@ -218,6 +241,7 @@ app.post('/api/projects/:pid/photos', (req, res) => {
     }
     p.updatedAt = Date.now();
     writeProject(p);
+    for (const f of accepted) queueDepth(p.id, f.filename);
     res.json({
       ...publicProject(p),
       rejected: files.length - accepted.length,
@@ -231,7 +255,9 @@ app.delete('/api/projects/:pid/photos/:photoId', (req, res) => {
   const idx = p.photos.findIndex((ph) => ph.id === req.params.photoId);
   if (idx === -1) return res.status(404).json({error: 'Photo introuvable.'});
   const [ph] = p.photos.splice(idx, 1);
-  fs.rmSync(path.join(projectDir(p.id), 'photos', ph.file), {force: true});
+  fs.rmSync(photoPath(p.id, ph.file), {force: true});
+  fs.rmSync(photoPath(p.id, depthName(ph.file)), {force: true});
+  fs.rmSync(photoPath(p.id, depthName(ph.file).replace(/\.png$/, '.json')), {force: true});
   p.updatedAt = Date.now();
   writeProject(p);
   res.json(publicProject(p));
@@ -254,7 +280,13 @@ app.post('/api/projects/:pid/render', (req, res) => {
   const outName = `villa-motion-${p.styleId}-${Date.now()}.mp4`;
   const outPath = path.join(renderDir, outName);
 
+  let beats;
+  try {
+    beats = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'music', `${p.music}.json`), 'utf8')).beats;
+  } catch {}
+
   const inputProps = {
+    beats,
     villaName: p.villaName,
     location: p.location,
     tagline: p.tagline,
@@ -264,12 +296,17 @@ app.post('/api/projects/:pid/render', (req, res) => {
     serverBase: `http://127.0.0.1:${PORT}`,
     photos: p.photos.map((ph) => ({
       src: `http://127.0.0.1:${PORT}/media/${p.id}/${ph.file}`,
+      depth: depthAvailable() ? `http://127.0.0.1:${PORT}/media/${p.id}/${depthName(ph.file)}` : undefined,
       label: ph.label || undefined,
     })),
   };
+  // Le moteur calcule les profondeurs manquantes avant le rendu.
+  const depthJobs = depthAvailable()
+    ? p.photos.map((ph) => ({src: photoPath(p.id, ph.file), out: photoPath(p.id, depthName(ph.file))}))
+    : [];
 
   const jobPath = path.join(renderDir, 'job.json');
-  fs.writeFileSync(jobPath, JSON.stringify({statusPath, outPath, inputProps}));
+  fs.writeFileSync(jobPath, JSON.stringify({statusPath, outPath, inputProps, depthJobs}));
   fs.writeFileSync(statusPath, JSON.stringify({state: 'starting', progress: 0, updatedAt: Date.now()}));
 
   const child = spawn(process.execPath, [path.join(__dirname, 'render-worker.mjs'), jobPath], {

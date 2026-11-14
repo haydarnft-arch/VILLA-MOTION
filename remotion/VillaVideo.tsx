@@ -1,198 +1,225 @@
 import React, {useMemo} from 'react';
-import {
-  AbsoluteFill,
-  Audio,
-  Easing,
-  interpolate,
-  useCurrentFrame,
-  useVideoConfig,
-} from 'remotion';
-import {TransitionSeries, linearTiming} from '@remotion/transitions';
-import type {
-  TransitionPresentation,
-  TransitionPresentationComponentProps,
-} from '@remotion/transitions';
-import {fade} from '@remotion/transitions/fade';
-import {slide} from '@remotion/transitions/slide';
-import {wipe} from '@remotion/transitions/wipe';
-import type {VillaProps} from './types';
-import {COLORS, THEMES} from './theme';
+import {AbsoluteFill, Audio, Easing, interpolate, Sequence, useCurrentFrame, useVideoConfig} from 'remotion';
+import type {VillaProps, StyleId} from './types';
+import {COLORS, THEMES, Theme} from './theme';
 import {loadFonts} from './fonts';
-import {Intro} from './components/Intro';
-import {Outro} from './components/Outro';
-import {KenBurnsPhoto} from './components/KenBurnsPhoto';
+import {buildPlan, Clip} from './planner';
+import {DepthCanvas} from './gl/DepthCanvas';
+import {applyFx, cameraAt, combineFx, enterFx, exitFx} from './components/camera';
+import {ChapterTitle, IntroTitle, LightLeak, OutroCard} from './components/Typography';
 
-// --- Dip-to-black presentation (cinematic) ---
-const DipToBlackComp: React.FC<
-  TransitionPresentationComponentProps<Record<string, never>>
-> = ({children, presentationDirection, presentationProgress}) => {
-  const opacity =
-    presentationDirection === 'exiting'
-      ? interpolate(presentationProgress, [0, 0.55], [1, 0], {
-          extrapolateRight: 'clamp',
-        })
-      : interpolate(presentationProgress, [0.45, 1], [0, 1], {
-          extrapolateLeft: 'clamp',
-        });
+const OUTRO_DISSOLVE = 20;
+const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
+
+const ClipView: React.FC<{
+  clip: Clip;
+  clipIndex: number;
+  dissolveIn: number;
+  beatFrames: number;
+  theme: Theme;
+  styleId: StyleId;
+  props: VillaProps;
+}> = ({clip, clipIndex, dissolveIn, beatFrames, theme, styleId, props}) => {
+  const frame = useCurrentFrame();
+  const {width, height, fps} = useVideoConfig();
+  const dur = clip.end - clip.start;
+  const fx = combineFx(enterFx(clip.inT, frame, dissolveIn), frame < dur ? exitFx(clip.outT, dur - frame) : exitFx('cut', 0));
+  const t = frame / dur;
+  const photo = (i: number) => props.photos[clip.photos[i]];
+  const seed = clip.start + frame;
+
+  if (clip.kind === 'intro') {
+    const cam = cameraAt(clip.moves[0], t);
+    const exposure = interpolate(frame, [0, 22, dur - 12, dur], [0, 0.58, 0.58, 1], clamp);
+    return (
+      <AbsoluteFill style={{opacity: fx.opacity}}>
+        <DepthCanvas
+          src={photo(0).src}
+          depthSrc={photo(0).depth}
+          width={width}
+          height={height}
+          seed={seed}
+          grain={theme.grain}
+          vignette={theme.vignette + 0.15}
+          camera={applyFx({...cam, exposure}, fx)}
+        />
+        <IntroTitle frame={frame} duration={dur} villaName={props.villaName} location={props.location} theme={theme} styleId={styleId} />
+        <LightLeak intensity={Math.max(fx.leak, interpolate(frame, [6, 26, 50], [0, 0.35, 0], clamp))} seed={clipIndex} />
+      </AbsoluteFill>
+    );
+  }
+
+  if (clip.kind === 'outro') {
+    const cam = cameraAt(clip.moves[0], t);
+    const blur = interpolate(frame, [0, fps * 1.2], [0, 12], clamp);
+    return (
+      <AbsoluteFill style={{opacity: fx.opacity, backgroundColor: COLORS.black}}>
+        <AbsoluteFill style={{filter: `blur(${blur}px)`, transform: 'scale(1.04)'}}>
+          <DepthCanvas
+            src={photo(0).src}
+            depthSrc={photo(0).depth}
+            width={width}
+            height={height}
+            seed={seed}
+            grain={theme.grain}
+            vignette={theme.vignette + 0.2}
+            camera={{...cam, exposure: interpolate(frame, [0, fps * 1.2, dur - fps, dur - 4], [1, 0.36, 0.3, 0], clamp)}}
+          />
+        </AbsoluteFill>
+        <OutroCard frame={frame} duration={dur} villaName={props.villaName} location={props.location} tagline={props.tagline} theme={theme} />
+      </AbsoluteFill>
+    );
+  }
+
+  if (clip.kind === 'split') {
+    const n = clip.photos.length;
+    const gap = 10;
+    const pw = Math.floor((width - gap * (n - 1)) / n);
+    const blurPx = Math.min(36, Math.abs(fx.blurX) * 110 + fx.radial * 60);
+    return (
+      <AbsoluteFill style={{opacity: fx.opacity, backgroundColor: COLORS.black, overflow: 'hidden'}}>
+        <AbsoluteFill
+          style={{
+            transform: `translateX(${-fx.offsetX * width}px) scale(${fx.zoomMul})`,
+            filter: `brightness(${fx.exposure})${blurPx > 0.3 ? ` blur(${blurPx}px)` : ''}`,
+          }}
+        >
+          {clip.photos.map((_, k) => {
+            const delay = Math.round(k * beatFrames * 0.5);
+            const p = interpolate(frame, [delay, delay + 12], [0, 1], {...clamp, easing: Easing.out(Easing.cubic)});
+            return (
+              <div
+                key={k}
+                style={{
+                  position: 'absolute',
+                  left: k * (pw + gap),
+                  top: 0,
+                  width: pw,
+                  height,
+                  overflow: 'hidden',
+                  clipPath: `inset(${(1 - p) * 100}% 0 0 0)`,
+                }}
+              >
+                <div style={{transform: `translateY(${(1 - p) * 80}px)`}}>
+                  <DepthCanvas
+                    src={photo(k).src}
+                    depthSrc={photo(k).depth}
+                    width={pw}
+                    height={height}
+                    seed={seed + k * 13}
+                    grain={theme.grain}
+                    vignette={0.18}
+                    camera={cameraAt(clip.moves[k], Math.max(0, frame - delay) / dur)}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </AbsoluteFill>
+        <LightLeak intensity={fx.leak} seed={clipIndex} />
+      </AbsoluteFill>
+    );
+  }
+
+  // Plan simple
+  const cam = applyFx(cameraAt(clip.moves[0], t), fx);
   return (
-    <AbsoluteFill style={{backgroundColor: '#000'}}>
-      <AbsoluteFill style={{opacity}}>{children}</AbsoluteFill>
+    <AbsoluteFill style={{opacity: fx.opacity}}>
+      <DepthCanvas
+        src={photo(0).src}
+        depthSrc={photo(0).depth}
+        width={width}
+        height={height}
+        seed={seed}
+        grain={theme.grain}
+        vignette={theme.vignette}
+        camera={cam}
+      />
+      {clip.chapter ? (
+        <>
+          <AbsoluteFill
+            style={{
+              background: 'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(5,5,6,0.55) 100%)',
+              opacity: interpolate(frame, [0, 10, Math.min(dur, fps * 2.4) - 6, Math.min(dur, fps * 2.4)], [0, 1, 1, 0], clamp),
+            }}
+          />
+          <ChapterTitle
+            frame={frame}
+            clipDuration={dur}
+            index={clip.chapter.index}
+            total={clip.chapter.total}
+            title={clip.chapter.title}
+            theme={theme}
+            styleId={styleId}
+            letterbox={theme.letterbox}
+          />
+        </>
+      ) : null}
+      <LightLeak intensity={fx.leak} seed={clipIndex} />
     </AbsoluteFill>
   );
 };
 
-const dipToBlack = (): TransitionPresentation<Record<string, never>> => ({
-  component: DipToBlackComp,
-  props: {},
-});
-
-const Letterbox: React.FC = () => {
+const Letterbox: React.FC<{size: number}> = ({size}) => {
   const frame = useCurrentFrame();
-  const {fps} = useVideoConfig();
-  const h = interpolate(frame, [0, fps * 1.2], [0, 110], {
-    extrapolateRight: 'clamp',
-    easing: Easing.out(Easing.cubic),
-  });
+  const h = interpolate(frame, [0, 30], [0, size], {...clamp, easing: Easing.out(Easing.cubic)});
+  const bar: React.CSSProperties = {position: 'absolute', left: 0, right: 0, height: h, background: '#000'};
   return (
-    <>
-      <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: h, background: '#000', zIndex: 50}} />
-      <div style={{position: 'absolute', bottom: 0, left: 0, right: 0, height: h, background: '#000', zIndex: 50}} />
-    </>
+    <AbsoluteFill style={{pointerEvents: 'none'}}>
+      <div style={{...bar, top: 0}} />
+      <div style={{...bar, bottom: 0}} />
+    </AbsoluteFill>
   );
 };
 
-// Evenly sample `n` photos across the user's chosen order.
-const samplePhotos = <T,>(photos: T[], n: number): T[] => {
-  if (n >= photos.length) return photos;
-  if (n <= 1) return [photos[0]];
-  const picked: T[] = [];
-  const used = new Set<number>();
-  for (let i = 0; i < n; i++) {
-    let idx = Math.round((i * (photos.length - 1)) / (n - 1));
-    while (used.has(idx) && idx < photos.length - 1) idx++;
-    used.add(idx);
-    picked.push(photos[idx]);
-  }
-  return picked;
-};
-
 export const VillaVideo: React.FC<VillaProps> = (props) => {
-  const {villaName, location, tagline, styleId, music, photos, serverBase} = props;
+  const {styleId, music, photos, serverBase, beats} = props;
   const theme = THEMES[styleId];
   const {fps, durationInFrames} = useVideoConfig();
 
   loadFonts(serverBase);
 
-  const plan = useMemo(() => {
-    const introF = Math.round(theme.introSeconds * fps);
-    const outroF = Math.round(theme.outroSeconds * fps);
-    const transF = Math.round(theme.transitionSeconds * fps);
-    const baseF = Math.round(theme.baseSceneSeconds * fps);
+  const plan = useMemo(
+    () => buildPlan(photos, styleId, fps, durationInFrames, music === 'none' ? undefined : beats),
+    [photos, styleId, fps, durationInFrames, beats, music]
+  );
 
-    let n = Math.max(
-      1,
-      Math.round((durationInFrames - introF - outroF + transF) / (baseF - transF))
-    );
-    n = Math.min(n, Math.max(1, photos.length));
+  if (!photos.length) {
+    return <AbsoluteFill style={{backgroundColor: COLORS.black}} />;
+  }
 
-    const totalSceneF = durationInFrames - introF - outroF + (n + 1) * transF;
-    const sceneF = Math.max(Math.round(fps * 1.4), Math.floor(totalSceneF / n));
-    const lastSceneF = Math.max(
-      Math.round(fps * 1.4),
-      totalSceneF - sceneF * (n - 1)
-    );
-    const scenes = samplePhotos(photos, n);
-    return {introF, outroF, transF, sceneF, lastSceneF, scenes};
-  }, [theme, fps, durationInFrames, photos]);
-
-  const pickTransition = (i: number, total: number) => {
-    // First and last transitions stay on an elegant fade.
-    if (styleId === 'cinematic') {
-      if (i === 0 || i === total - 1) return fade();
-      return dipToBlack();
-    }
-    if (styleId === 'modern') {
-      if (i === 0 || i === total - 1) return fade();
-      if (i % 3 === 1) return wipe({direction: 'from-left'});
-      if (i % 3 === 2) return slide({direction: 'from-right'});
-      return fade();
-    }
-    return fade();
-  };
-
-  const totalTransitions = plan.scenes.length + 1;
-  const musicVolume = 1;
-  const fadeInF = Math.round(fps * 1.4);
+  const fadeInF = Math.round(fps * 0.6);
   const fadeOutStartF = durationInFrames - Math.round(fps * 2.6);
 
   return (
     <AbsoluteFill style={{backgroundColor: COLORS.black}}>
-      <TransitionSeries>
-        <TransitionSeries.Sequence durationInFrames={plan.introF}>
-          <Intro
-            villaName={villaName}
-            location={location}
-            backgroundSrc={photos[0]?.src}
-            styleId={styleId}
-            theme={theme}
-          />
-        </TransitionSeries.Sequence>
-
-        <TransitionSeries.Transition
-          presentation={pickTransition(0, totalTransitions)}
-          timing={linearTiming({
-            durationInFrames: plan.transF,
-            easing: Easing.inOut(Easing.ease),
-          })}
-        />
-
-        {plan.scenes.map((photo, i) => (
-          <React.Fragment key={i}>
-            <TransitionSeries.Sequence
-              durationInFrames={i === plan.scenes.length - 1 ? plan.lastSceneF : plan.sceneF}
-            >
-              <KenBurnsPhoto
-                src={photo.src}
-                label={photo.label}
-                index={i}
-                styleId={styleId}
-                theme={theme}
-              />
-            </TransitionSeries.Sequence>
-            <TransitionSeries.Transition
-              presentation={pickTransition(i + 1, totalTransitions)}
-              timing={linearTiming({
-                durationInFrames: plan.transF,
-                easing: Easing.inOut(Easing.ease),
-              })}
+      {plan.clips.map((clip, i) => {
+        const next = plan.clips[i + 1];
+        const dissolveIn = clip.kind === 'outro' ? OUTRO_DISSOLVE : theme.dissolveFrames;
+        const tail = clip.outT === 'dissolve' && next ? (next.kind === 'outro' ? OUTRO_DISSOLVE : theme.dissolveFrames) : 0;
+        return (
+          <Sequence key={i} from={clip.start} durationInFrames={Math.max(1, clip.end - clip.start + tail)}>
+            <ClipView
+              clip={clip}
+              clipIndex={i}
+              dissolveIn={dissolveIn}
+              beatFrames={plan.beatFrames}
+              theme={theme}
+              styleId={styleId}
+              props={props}
             />
-          </React.Fragment>
-        ))}
+          </Sequence>
+        );
+      })}
 
-        <TransitionSeries.Sequence durationInFrames={plan.outroF}>
-          <Outro
-            villaName={villaName}
-            location={location}
-            tagline={tagline}
-            backgroundSrc={photos[photos.length - 1]?.src}
-            theme={theme}
-          />
-        </TransitionSeries.Sequence>
-      </TransitionSeries>
-
-      {theme.letterbox ? <Letterbox /> : null}
+      {theme.letterbox ? <Letterbox size={theme.letterbox} /> : null}
 
       {music !== 'none' ? (
         <Audio
           src={`${serverBase}/assets/music/${music}.mp3`}
           pauseWhenBuffering
           volume={(f) =>
-            interpolate(
-              f,
-              [0, fadeInF, fadeOutStartF, durationInFrames - 5],
-              [0, musicVolume, musicVolume, 0],
-              {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}
-            )
+            interpolate(f, [0, fadeInF, fadeOutStartF, durationInFrames - 5], [0, 1, 1, 0], clamp)
           }
         />
       ) : null}

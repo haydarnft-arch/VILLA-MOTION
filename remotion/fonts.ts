@@ -24,7 +24,7 @@ export const loadFonts = (serverBase: string) => {
         opts
       );
       return face.load().then((f) => {
-        document.fonts.add(f);
+        (document.fonts as unknown as {add: (f: FontFace) => void}).add(f);
       });
     })
   )
