@@ -1,0 +1,33 @@
+{
+  "name": "villa-motion",
+  "version": "1.0.0",
+  "description": "Générateur de vidéos promotionnelles immobilières haut de gamme",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/index.js",
+    "studio": "npx remotion studio remotion/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haydarnft-arch/VILLA-MOTION.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/haydarnft-arch/VILLA-MOTION/issues"
+  },
+  "homepage": "https://github.com/haydarnft-arch/VILLA-MOTION#readme",
+  "type": "module",
+  "dependencies": {
+    "@remotion/bundler": "^4.0.543",
+    "@remotion/renderer": "^4.0.543",
+    "@remotion/transitions": "^4.0.543",
+    "express": "^5.3.0",
+    "multer": "^2.5.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.543"
+  }
+}

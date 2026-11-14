@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VILLA MOTION</title>
+<link rel="stylesheet" href="/styles.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230A0A0B'/%3E%3Cpath d='M8 22 16 9l8 13' fill='none' stroke='%23C8A96E' stroke-width='1.6'/%3E%3C/svg%3E" />
+</head>
+<body>
+
+<!-- ======== ACCUEIL ======== -->
+<main id="view-home" class="view">
+  <header class="hero">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" class="brand-mark" aria-hidden="true"><path d="M6 24 16 7l10 17" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11.5 24 16 16.4 20.5 24" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".6"/></svg>
+      <h1>VILLA <span>MOTION</span></h1>
+    </div>
+    <p class="hero-sub">Films promotionnels d'exception pour villas &amp; locations de prestige</p>
+    <button id="btn-new" class="btn btn-gold">Créer un nouveau projet</button>
+  </header>
+
+  <section class="projects-section">
+    <div class="section-label">Vos projets</div>
+    <div id="projects-grid" class="projects-grid"></div>
+    <p id="projects-empty" class="empty-note" hidden>Aucun projet pour le moment — créez le premier.</p>
+  </section>
+</main>
+
+<!-- ======== ÉDITEUR ======== -->
+<main id="view-editor" class="view" hidden>
+  <nav class="topbar">
+    <button id="btn-back" class="btn btn-ghost">&#8592; Projets</button>
+    <div class="topbar-title" id="editor-title"></div>
+    <div class="topbar-spacer"></div>
+  </nav>
+
+  <div class="editor-grid">
+    <div class="editor-main">
+
+      <section class="panel">
+        <div class="section-label">01 — Informations</div>
+        <div class="fields">
+          <label class="field">
+            <span>Nom de la villa</span>
+            <input id="f-name" type="text" maxlength="60" placeholder="Villa Horizon" />
+          </label>
+          <label class="field">
+            <span>Localisation</span>
+            <input id="f-location" type="text" maxlength="60" placeholder="Saint-Tropez, France" />
+          </label>
+          <label class="field field-wide">
+            <span>Texte de conclusion</span>
+            <input id="f-tagline" type="text" maxlength="80" placeholder="Visite privée sur demande" />
+          </label>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-label">02 — Photographies <span id="photo-count" class="count"></span></div>
+        <p class="hint">Importez entre 20 et 50 photographies fournies par votre client. Glissez les vignettes pour définir l'ordre du film&nbsp;; ajoutez un libellé (Salon, Piscine…) pour une présentation élégante des pièces.</p>
+        <div id="dropzone" class="dropzone">
+          <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden />
+          <div class="dz-inner">
+            <div class="dz-icon">+</div>
+            <div>Déposez vos photos ici ou <u>parcourez</u></div>
+            <div class="dz-small">JPEG · PNG · WebP — 30 Mo max / photo</div>
+          </div>
+        </div>
+        <p id="photo-warning" class="warn" hidden></p>
+        <div id="photo-grid" class="photo-grid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-label">03 — Style de présentation</div>
+        <div class="style-grid">
+          <button class="style-card" data-style="luxury">
+            <div class="style-name serif">Luxury</div>
+            <p>Fondus amples, mouvements de caméra lents, sérif raffinée. L'élégance intemporelle.</p>
+          </button>
+          <button class="style-card" data-style="cinematic">
+            <div class="style-name serif">Cinematic</div>
+            <p>Format letterbox, fondus au noir, montée dramatique. L'esprit bande-annonce.</p>
+          </button>
+          <button class="style-card" data-style="modern">
+            <div class="style-name serif">Modern</div>
+            <p>Rythme soutenu, balayages graphiques, typographie contemporaine.</p>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-label">04 — Musique</div>
+        <div class="music-list" id="music-list">
+          <div class="music-item" data-music="luxury">
+            <button class="play" data-src="/assets/music/luxury.mp3" aria-label="Écouter">&#9654;</button>
+            <div class="music-meta"><strong>Élégance</strong><span>Piano &amp; nappes feutrées</span></div>
+            <div class="radio"></div>
+          </div>
+          <div class="music-item" data-music="cinematic">
+            <button class="play" data-src="/assets/music/cinematic.mp3" aria-label="Écouter">&#9654;</button>
+            <div class="music-meta"><strong>Grandeur</strong><span>Cordes orchestrales</span></div>
+            <div class="radio"></div>
+          </div>
+          <div class="music-item" data-music="modern">
+            <button class="play" data-src="/assets/music/modern.mp3" aria-label="Écouter">&#9654;</button>
+            <div class="music-meta"><strong>Signature</strong><span>Électro lounge épurée</span></div>
+            <div class="radio"></div>
+          </div>
+          <div class="music-item" data-music="none">
+            <div class="play muted">&#215;</div>
+            <div class="music-meta"><strong>Sans musique</strong><span>Bande sonore silencieuse</span></div>
+            <div class="radio"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-label">05 — Durée du film</div>
+        <div class="duration-row" id="duration-row">
+          <button class="pill" data-duration="30">30 s</button>
+          <button class="pill" data-duration="35">35 s</button>
+          <button class="pill" data-duration="40">40 s</button>
+          <button class="pill" data-duration="45">45 s</button>
+        </div>
+      </section>
+    </div>
+
+    <aside class="editor-side">
+      <section class="panel panel-render">
+        <div class="section-label">Production</div>
+        <div class="render-spec">
+          <div><span>Format</span><strong>16:9 — 1920 × 1080</strong></div>
+          <div><span>Fichier</span><strong>MP4 · H.264 · 30 i/s</strong></div>
+          <div><span>Scènes</span><strong id="spec-scenes">—</strong></div>
+        </div>
+        <button id="btn-render" class="btn btn-gold btn-block">Générer ma vidéo</button>
+        <div id="render-progress" class="progress" hidden>
+          <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
+          <div id="progress-label" class="progress-label">Préparation…</div>
+        </div>
+        <p id="render-error" class="warn" hidden></p>
+
+        <div id="result" class="result" hidden>
+          <div class="section-label">Votre film</div>
+          <video id="result-video" controls playsinline></video>
+          <a id="btn-download" class="btn btn-gold btn-block" download>Télécharger la vidéo</a>
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<!-- ======== MODALE NOUVEAU PROJET ======== -->
+<div id="modal" class="modal" hidden>
+  <div class="modal-card">
+    <div class="section-label">Nouveau projet</div>
+    <h2 class="serif">Une nouvelle propriété</h2>
+    <label class="field">
+      <span>Nom de la villa</span>
+      <input id="m-name" type="text" maxlength="60" placeholder="Villa Horizon" />
+    </label>
+    <label class="field">
+      <span>Localisation</span>
+      <input id="m-location" type="text" maxlength="60" placeholder="Saint-Tropez, France" />
+    </label>
+    <div class="modal-actions">
+      <button id="m-cancel" class="btn btn-ghost">Annuler</button>
+      <button id="m-create" class="btn btn-gold">Créer le projet</button>
+    </div>
+  </div>
+</div>
+
+<audio id="preview-audio" hidden></audio>
+<script src="/app.js"></script>
+</body>
+</html>
