@@ -124,13 +124,13 @@ export const ChapterTitle: React.FC<{
         <div style={{position: 'absolute', left: 110, bottom, display: 'flex', alignItems: 'flex-end', gap: 26}}>
           <div style={{width: 10, height: 120 * rule, background: COLORS.gold}} />
           <div>
-            <div style={{fontFamily: 'Montserrat', fontWeight: 600, fontSize: 22, letterSpacing: '0.3em', color: COLORS.gold, marginBottom: 6, opacity: rule}}>{num}</div>
+            <div style={{fontFamily: 'Montserrat', fontWeight: 600, fontSize: 22, letterSpacing: '0.3em', color: COLORS.gold, marginBottom: 6, opacity: rule, textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 2px 18px rgba(0,0,0,0.7)'}}>{num}</div>
             <MaskedLetters
               text={title}
               frame={frame}
               delay={3}
               stagger={1}
-              style={{fontFamily: 'Montserrat', fontWeight: 600, fontSize: 96, lineHeight: 1, textTransform: 'uppercase', letterSpacing: '0.04em', color: COLORS.white, textShadow: '0 4px 40px rgba(0,0,0,0.45)'}}
+              style={{fontFamily: 'Montserrat', fontWeight: 600, fontSize: 96, lineHeight: 1, textTransform: 'uppercase', letterSpacing: '0.04em', color: COLORS.white, textShadow: '0 2px 6px rgba(0,0,0,0.5), 0 4px 40px rgba(0,0,0,0.55)'}}
             />
           </div>
         </div>
@@ -153,14 +153,14 @@ export const ChapterTitle: React.FC<{
         <div
           style={{
             fontFamily: 'Montserrat',
-            fontWeight: 300,
+            fontWeight: 600,
             fontSize: 22,
             letterSpacing: '0.42em',
             color: COLORS.gold,
             opacity: rule,
             marginBottom: 14,
             paddingLeft: centered ? '0.42em' : 0,
-            textShadow: '0 2px 16px rgba(0,0,0,0.6)',
+            textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 2px 18px rgba(0,0,0,0.7)',
           }}
         >
           {num}
@@ -180,7 +180,7 @@ export const ChapterTitle: React.FC<{
             letterSpacing: centered ? '0.32em' : '0.01em',
             paddingLeft: centered ? '0.32em' : 0,
             color: COLORS.white,
-            textShadow: '0 4px 40px rgba(0,0,0,0.5)',
+            textShadow: '0 2px 6px rgba(0,0,0,0.55), 0 4px 40px rgba(0,0,0,0.6)',
           }}
         />
         <div
@@ -260,8 +260,8 @@ export const OutroCard: React.FC<{
               marginTop: 40,
               fontFamily: "'Cormorant Garamond', serif",
               fontStyle: 'italic',
-              fontSize: 36,
-              color: 'rgba(247,244,238,0.88)',
+              fontSize: 40,
+              color: COLORS.white,
               opacity: Math.min(1, tag * 1.3),
               transform: `translateY(${(1 - tag) * 14}px)`,
             }}

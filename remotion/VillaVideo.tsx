@@ -139,7 +139,10 @@ const ClipView: React.FC<{
         <>
           <AbsoluteFill
             style={{
-              background: 'linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(5,5,6,0.55) 100%)',
+              background:
+                styleId === 'cinematic'
+                  ? 'linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(5,5,6,0.7) 100%)'
+                  : 'radial-gradient(ellipse 75% 70% at 10% 100%, rgba(5,5,6,0.78) 0%, rgba(5,5,6,0.45) 45%, rgba(5,5,6,0) 75%)',
               opacity: interpolate(frame, [0, 10, Math.min(dur, fps * 2.4) - 6, Math.min(dur, fps * 2.4)], [0, 1, 1, 0], clamp),
             }}
           />
