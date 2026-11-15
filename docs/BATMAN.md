@@ -28,7 +28,9 @@ Un bon prospect, c'est une **entreprise (TPE/PME, marque, agence)** qui :
 
 Note chaque prospect de 1 à 5 (colonne L) : 5 = besoin précis et récent trouvé, contact direct ; 3 = bon secteur et contact pro, pas de signal particulier ; 1-2 = douteux. **N'envoie qu'à partir de 3.** Écris en colonne I le fait précis qui justifie le contact (« ouvre un second restaurant à Lyon en décembre », « lance une collection capsule », « vient de lancer son appli »…), avec sa source en colonne J.
 
-Varie les secteurs : pas plus de 6 emails du même secteur par jour, pas plus de 2 adresses du même nom de domaine par jour.
+Varie les secteurs et les régions : pas plus de 6 emails du même secteur par jour, pas plus de 8 prospects de la même région par jour, pas plus de 2 adresses du même nom de domaine par jour. Cette limite par domaine ne s'applique pas aux messageries publiques (gmail.com, outlook.fr, hotmail.fr, yahoo.fr…) : pour elles, on vérifie seulement que l'adresse exacte n'a jamais été contactée.
+
+Fiabilité des adresses : préfère une adresse publiée par l'entreprise elle-même (son site, sa fiche officielle) à une adresse recopiée par un comparatif ou un annuaire tiers. Si l'adresse ne vient que d'un annuaire tiers, baisse le score d'un point. Les adresses revenues en erreur (« Adresse invalide ») sont remplacées par d'autres prospects le jour même, dans la limite de 25 envois au total.
 
 ## Règles à ne jamais enfreindre
 
@@ -36,7 +38,7 @@ Varie les secteurs : pas plus de 6 emails du même secteur par jour, pas plus de
 - Pays autorisés : France (y compris outre-mer), Portugal, Royaume-Uni, États-Unis, Émirats arabes unis, Maurice, Monaco. Jamais les pays de la ligne « Pays exclus » (consentement obligatoire même entre professionnels).
 - **Pas de doublon** : avant chaque envoi, vérifier que l'adresse et le domaine ne sont ni dans l'onglet Batman ni dans l'onglet Prospects, et qu'une recherche Gmail `in:sent to:ADRESSE` ne renvoie rien.
 - N'envoyer qu'aux lignes « À contacter ». Jamais aux lignes « À vérifier », « STOP », « Réponse », « Adresse invalide ».
-- **Rien de faux** : pas de clients, de chiffres ou de délais inventés ; pas de faux « Re: » ni de « suite à notre échange » ; pas de compliment sur un détail non vérifié.
+- **Rien de faux** : pas de clients, de chiffres ou de délais inventés ; pas de faux « Re: » ni de « suite à notre échange ». Un email ne cite **que des faits écrits en colonne I avec leur source en colonne J** : aucun détail ajouté de mémoire ou supposé (vue, terrasse, déco, chiffres…).
 - Ne jamais répondre aux prospects : Haydar s'en charge.
 - Envoyer uniquement entre 13 h 00 et 18 h 00 (heure de Paris).
 
