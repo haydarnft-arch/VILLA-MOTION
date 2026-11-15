@@ -5,3 +5,5 @@ projects/
 samples/
 models/
 prospection/
+.hyperframes/
+__pycache__/
