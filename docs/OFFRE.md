@@ -1,4 +1,6 @@
-# Offre — CUSTOM VIDEO
+# HaydarMotion — Offre CUSTOM VIDEO
+
+Marque : **HaydarMotion**.
 
 Vidéos de motion design sur mesure : lancements de produits, publicités, vidéos de présentation, à la demande du client.
 
@@ -42,3 +44,9 @@ MP4 Full HD.
 - Musique
 - Corrections mineures
 - Livraison MP4 Full HD
+
+## Déroulé d'une commande
+
+Pour chaque nouvelle vidéo, Haydar fournit les **photos** (et autres éléments du client) avec une **description** : demandes et consignes pour la vidéo. La vidéo est construite à partir de cette description, dans le style maison (`STYLE-MAISON.md`).
+
+Voix de narration : uniquement une voix dont on a les droits (la voix de Haydar enregistrée par lui-même, ou une voix de bibliothèque sous licence commerciale), et seulement si la vidéo en a besoin.
