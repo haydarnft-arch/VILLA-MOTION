@@ -48,10 +48,21 @@ Varie les secteurs : pas plus de 6 emails du même secteur par jour, pas plus de
 - Varier vraiment d'un email à l'autre : objet, salutation, accroche, ordre des arguments, formule finale.
 - Signature (lue dans Réglages) : prénom et nom, HaydarMotion, téléphone (international pour les emails en anglais). Puis une ligne de désinscription : répondre STOP pour ne plus recevoir de message (en anglais : reply STOP).
 
-## Déroulé d'une session
+## Deux sessions par jour
+
+Batman tourne sur le modèle **Sonnet** pour économiser la limite d'utilisation du compte, partagée avec le reste du travail. La partie la plus coûteuse (les recherches) est faite la veille au soir, quand le compte est peu utilisé.
+
+### Session « Préparation » (le soir, vers 20 h 45, aucun envoi)
+
+1. Lire Réglages. Si « Batman actif » ne vaut pas OUI : s'arrêter.
+2. Compter les lignes « À contacter » de l'onglet Batman. Compléter jusqu'à **au moins 30** prospects notés 3 ou plus (une marge au cas où certains seraient écartés le lendemain), recherchés sur le web. Les sites eux-mêmes sont souvent bloqués depuis la session : s'appuyer sur les résultats de recherche, annuaires et comparatifs publics, et noter la source.
+3. Pour chaque nouveau prospect, remplir A à E, F « À contacter », I (le fait précis qui justifie le contact), J (source), L (score). Vérifier l'absence de doublon (onglets Batman et Prospects, recherche Gmail `in:sent to:ADRESSE`).
+4. **N'envoyer aucun email.** Finir par une ligne : nombre de prospects prêts pour le lendemain, répartition par secteur.
+
+### Session « Envoi » (13 h 00)
 
 1. Lire Réglages. Si « Batman actif » ne vaut pas OUI : s'arrêter.
 2. Traiter les retours des 7 derniers jours (onglets Batman et Prospects) : réponses (statut « Réponse » + résumé d'une ligne en colonne K), demandes d'arrêt (« STOP »), emails revenus en erreur (`from:mailer-daemon OR from:postmaster`, « Adresse invalide »).
-3. Constituer la liste du jour : au moins 25 prospects notés 3 ou plus, recherchés sur le web (les sites eux-mêmes sont souvent bloqués depuis la session : s'appuyer sur les résultats de recherche, annuaires et comparatifs publics, et noter la source). Les ajouter à l'onglet Batman en « À contacter ».
-4. À partir de 13 h 00, envoyer les 25 emails un par un avec l'outil Gmail d'envoi, et mettre à jour chaque ligne juste après l'envoi (F « Envoyé », G date, H objet). En cas d'erreur Gmail : arrêter pour la journée et noter l'erreur en colonne K.
+3. Prendre les lignes « À contacter » préparées la veille, les meilleurs scores d'abord, en respectant les quotas par secteur et par domaine. S'il en manque, compléter par quelques recherches rapides.
+4. Entre 13 h 00 et 18 h 00, envoyer 25 emails un par un avec l'outil Gmail d'envoi, en revérifiant juste avant chaque envoi que l'adresse n'a jamais reçu d'email (`in:sent to:ADRESSE`), et mettre à jour chaque ligne juste après l'envoi (F « Envoyé », G date, H objet). En cas d'erreur Gmail : arrêter pour la journée et noter l'erreur en colonne K.
 5. Finir par un résumé court : envoyés, réponses, STOP, adresses invalides, répartition par secteur, et 2 ou 3 exemples d'angles utilisés.
