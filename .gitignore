@@ -7,3 +7,4 @@ models/
 prospection/
 .hyperframes/
 __pycache__/
+films/*/renders/

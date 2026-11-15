@@ -1,0 +1,55 @@
+<template id="s2-template">
+  <div id="root" data-composition-id="s2" data-width="1080" data-height="1920" data-duration="3.15">
+    <div id="s2-stage">
+      <svg id="s2-bowl" viewBox="0 0 1080 700" width="1080" height="700" aria-hidden="true">
+        <path id="steam1" class="steam" d="M470 330 C448 295 492 270 470 235 C452 205 486 185 470 160" />
+        <path id="steam2" class="steam" d="M540 320 C518 285 562 260 540 225 C522 195 556 175 540 150" />
+        <path id="steam3" class="steam" d="M610 330 C588 295 632 270 610 235 C592 205 626 185 610 160" />
+        <path id="rim" d="M330 380 L750 380" />
+        <path id="bowl" d="M345 380 C345 480 440 520 540 520 C640 520 735 480 735 380" />
+        <path id="foot" d="M470 532 L610 532" />
+      </svg>
+      <div id="s2-title" class="s2-line"><span class="w">DES</span> <span class="w">MARAUDES</span></div>
+      <div id="s2-sub" class="s2-line"><span class="v">pour</span> <span class="v">les</span> <span class="v">plus</span> <span class="v">nécessiteux</span></div>
+    </div>
+    <style>
+      @font-face { font-family: "Montserrat"; src: url("assets/fonts/montserrat-latin-900-normal.woff2") format("woff2"); font-weight: 900; }
+      @font-face { font-family: "Montserrat"; src: url("assets/fonts/montserrat-latin-700-normal.woff2") format("woff2"); font-weight: 700; }
+      #root { position: absolute; inset: 0; }
+      #s2-stage { position: absolute; inset: 0; }
+      #s2-bowl { position: absolute; left: 0; top: 470px; overflow: visible; }
+      #s2-bowl path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      #rim, #bowl, #foot { stroke: #f7f4ee; stroke-width: 14; }
+      .steam { stroke: #edaf44; stroke-width: 9; opacity: 0.9; }
+      .s2-line { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; font-family: "Montserrat", sans-serif; }
+      .s2-line span { display: inline-block; }
+      #s2-title { top: 1040px; font-weight: 900; font-size: 96px; line-height: 1; color: #f7f4ee; }
+      #s2-sub { top: 1160px; font-weight: 700; font-size: 54px; color: #edaf44; }
+    </style>
+    <script src="../vendor/gsap.min.js"></script>
+    <script>
+      (function () {
+        const S = '[data-composition-id="s2"] ';
+        const tl = gsap.timeline({ paused: true });
+        const len = (sel) => document.querySelector(S + sel).getTotalLength();
+        ["#rim", "#bowl", "#foot", "#steam1", "#steam2", "#steam3"].forEach((id) => {
+          const L = len(id);
+          tl.set(S + id, { strokeDasharray: L, strokeDashoffset: L }, 0);
+        });
+        // Le bol se dessine sous le toit (le chevron), puis la vapeur monte
+        tl.to(S + "#rim", { strokeDashoffset: 0, duration: 0.35, ease: "power3.out" }, 0.08);
+        tl.to(S + "#bowl", { strokeDashoffset: 0, duration: 0.5, ease: "power3.out" }, 0.16);
+        tl.to(S + "#foot", { strokeDashoffset: 0, duration: 0.3, ease: "power3.out" }, 0.4);
+        tl.to([S + "#steam1", S + "#steam2", S + "#steam3"], { strokeDashoffset: 0, duration: 0.7, ease: "power2.out", stagger: 0.12 }, 0.45);
+        // « DES MARAUDES » mot par mot en flou (voix 4,94 s = 0,19 s local)
+        tl.fromTo(S + "#s2-title .w", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.14, ease: "power2.out", stagger: 0.1 }, 0.17);
+        // « pour les plus nécessiteux » du gris vers l'ambre (voix 5,90 s = 1,15 s local)
+        tl.fromTo(S + "#s2-sub .v", { opacity: 0, color: "#5b6478" }, { opacity: 1, color: "#EDAF44", duration: 0.12, ease: "power1.out", stagger: 0.09 }, 1.13);
+        // Panoramique filé vers la gauche
+        tl.to(S + "#s2-stage", { x: -1080, duration: 0.28, ease: "power3.in" }, 2.85);
+        window.__timelines = window.__timelines || {};
+        window.__timelines["s2"] = tl;
+      })();
+    </script>
+  </div>
+</template>

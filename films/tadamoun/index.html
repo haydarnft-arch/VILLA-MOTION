@@ -1,0 +1,78 @@
+<!doctype html>
+<html
+  lang="fr"
+  data-composition-variables='[
+  {"id":"color-ground","type":"color","label":"Fond nuit","default":"#0D1220"},
+  {"id":"color-ink","type":"color","label":"Texte clair","default":"#F7F4EE"},
+  {"id":"color-amber","type":"color","label":"Ambre (logo)","default":"#EDAF44"},
+  {"id":"color-red","type":"color","label":"Rouge (logo)","default":"#DA5342"},
+  {"id":"color-blue","type":"color","label":"Bleu (logo)","default":"#4182D8"}
+]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Montserrat"; src: url("assets/fonts/montserrat-latin-900-normal.woff2") format("woff2"); font-weight: 900; }
+      @font-face { font-family: "Montserrat"; src: url("assets/fonts/montserrat-latin-800-normal.woff2") format("woff2"); font-weight: 800; }
+      @font-face { font-family: "Montserrat"; src: url("assets/fonts/montserrat-latin-700-normal.woff2") format("woff2"); font-weight: 700; }
+      @font-face { font-family: "Montserrat"; src: url("assets/fonts/montserrat-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+      @font-face { font-family: "Cairo"; src: url("assets/fonts/cairo-arabic-800-normal.woff2") format("woff2"); font-weight: 800; }
+      :root {
+        --color-ground: #0d1220;
+        --color-ink: #f7f4ee;
+        --color-amber: #edaf44;
+        --color-red: #da5342;
+        --color-blue: #4182d8;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0d1220; }
+      #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: "Montserrat", sans-serif; }
+      #ground { position: absolute; inset: 0; background-color: #0d1220; }
+      #night-glow {
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse 70% 45% at 50% 48%, rgba(237, 175, 68, 0.18) 0%, rgba(237, 175, 68, 0.06) 45%, rgba(13, 18, 32, 0) 75%);
+      }
+      .layer { position: absolute; inset: 0; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="19.6"
+      data-width="1080"
+      data-height="1920"
+      data-motion-blur="on"
+    >
+      <div id="ground" class="clip" data-start="0" data-duration="19.6" data-track-index="0" data-layout-allow-overlap></div>
+      <div id="night-glow" class="clip" data-start="0" data-duration="19.6" data-track-index="7" data-layout-allow-overlap></div>
+
+      <div id="s1-host" class="layer" data-composition-id="s1" data-composition-src="compositions/s1-solidarite.html"
+        data-start="0" data-duration="4.8" data-track-index="1" data-track-kind="graphics"></div>
+      <div id="s2-host" class="layer" data-composition-id="s2" data-composition-src="compositions/s2-maraudes.html"
+        data-start="4.75" data-duration="3.15" data-track-index="2" data-track-kind="graphics"></div>
+      <div id="s3-host" class="layer" data-composition-id="s3" data-composition-src="compositions/s3-voyages.html"
+        data-start="7.6" data-duration="2.55" data-track-index="3" data-track-kind="graphics"></div>
+      <div id="s4-host" class="layer" data-composition-id="s4" data-composition-src="compositions/s4-ensemble.html"
+        data-start="9.95" data-duration="3.85" data-track-index="4" data-track-kind="graphics"></div>
+      <div id="s5-host" class="layer" data-composition-id="s5" data-composition-src="compositions/s5-logo.html"
+        data-start="13.55" data-duration="6.05" data-track-index="5" data-track-kind="graphics"></div>
+      <div id="fil-host" class="layer" data-composition-id="fil" data-composition-src="compositions/fil-chevron.html"
+        data-start="0" data-duration="19.6" data-track-index="6" data-track-kind="graphics" style="z-index: 20"></div>
+
+      <audio id="bande-son" src="assets/audio/bande-son.m4a" data-start="0" data-duration="19.6" data-track-index="10"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      // Couleur du fond : nuit -> ambre (sport) -> blanc (logo)
+      tl.to("#night-glow", { opacity: 0, duration: 0.3, ease: "power2.inOut" }, 9.95);
+      tl.to("#ground", { backgroundColor: "#EDAF44", duration: 0.4, ease: "power2.inOut" }, 9.95);
+      tl.to("#ground", { backgroundColor: "#FFFFFF", duration: 0.45, ease: "power2.inOut" }, 13.55);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

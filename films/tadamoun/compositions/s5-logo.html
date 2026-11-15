@@ -1,0 +1,42 @@
+<template id="s5-template">
+  <div id="root" data-composition-id="s5" data-width="1080" data-height="1920" data-duration="6.05">
+    <div id="s5-asso">ASSOCIATION</div>
+    <div id="s5-logo"><img id="s5-logo-img" src="assets/img/tadamoun-logo.png" alt="Logo Tadamoun" /></div>
+    <div id="s5-cta" class="s5-line"><span class="w">Rejoignez</span> <span class="w">le</span></div>
+    <div id="s5-cta2" class="s5-line"><span class="w hl">mouvement</span></div>
+    <div id="s5-handle" class="s5-line">@assotadamoun</div>
+    <style>
+      @font-face { font-family: "Montserrat"; src: url("assets/fonts/montserrat-latin-800-normal.woff2") format("woff2"); font-weight: 800; }
+      @font-face { font-family: "Montserrat"; src: url("assets/fonts/montserrat-latin-700-normal.woff2") format("woff2"); font-weight: 700; }
+      @font-face { font-family: "Montserrat"; src: url("assets/fonts/montserrat-latin-500-normal.woff2") format("woff2"); font-weight: 500; }
+      #root { position: absolute; inset: 0; }
+      #s5-asso { position: absolute; left: 0; top: 300px; width: 1080px; text-align: center; font-family: "Montserrat", sans-serif; font-weight: 500; font-size: 40px; letter-spacing: 0.42em; padding-left: 0.42em; color: #0d1220; }
+      #s5-logo { position: absolute; left: 230px; top: 360px; width: 620px; height: 620px; border-radius: 50%; overflow: hidden; background: #ffffff; box-shadow: 0 30px 80px rgba(13, 18, 32, 0.14); }
+      #s5-logo-img { position: absolute; left: -10px; top: -10px; width: 640px; height: 640px; display: block; }
+      .s5-line { position: absolute; left: 0; width: 1080px; text-align: center; white-space: nowrap; font-family: "Montserrat", sans-serif; }
+      .s5-line .w { display: inline-block; }
+      #s5-cta, #s5-cta2 { font-weight: 800; font-size: 76px; line-height: 1.12; color: #0d1220; }
+      #s5-cta { top: 1005px; }
+      #s5-cta2 { top: 1090px; }
+      #s5-cta2 .hl { padding: 0 16px; background-image: linear-gradient(#edaf44, #edaf44); background-repeat: no-repeat; background-position: 0 50%; background-size: 0% 100%; border-radius: 10px; }
+      #s5-handle { top: 1192px; font-weight: 700; font-size: 44px; color: #4182d8; }
+    </style>
+    <script src="../vendor/gsap.min.js"></script>
+    <script>
+      (function () {
+        const S = '[data-composition-id="s5"] ';
+        const tl = gsap.timeline({ paused: true });
+        tl.set([S + "#s5-asso", S + ".s5-line .w", S + "#s5-handle"], { opacity: 0 }, 0);
+        // Le logo apparaît sous le chevron qui vient s'y poser (film 13,85 → 14,05)
+        tl.fromTo(S + "#s5-logo", { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }, 0.3);
+        tl.fromTo(S + "#s5-asso", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, 0.5);
+        // « Rejoignez le mouvement » mot par mot (voix 16,27 s = 2,72 s local), puis le surlignage ambre
+        tl.fromTo([S + "#s5-cta .w", S + "#s5-cta2 .w"], { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.13, ease: "power2.out", stagger: 0.12 }, 2.7);
+        tl.to(S + "#s5-cta2 .hl", { backgroundSize: "100% 100%", duration: 0.35, ease: "power3.out" }, 3.05);
+        tl.fromTo(S + "#s5-handle", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" }, 3.45);
+        window.__timelines = window.__timelines || {};
+        window.__timelines["s5"] = tl;
+      })();
+    </script>
+  </div>
+</template>
