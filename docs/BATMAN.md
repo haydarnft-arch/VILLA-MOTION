@@ -47,6 +47,14 @@ Un bon prospect, c'est une **entreprise (TPE/PME, marque, agence)** qui :
 - publie une **adresse email professionnelle** (sur son site, un annuaire officiel, une fiche d'office de tourisme, un comparatif public…) ;
 - est assez petite pour que l'email arrive à quelqu'un qui décide (éviter les grands groupes et leurs services presse).
 
+### Les outils de recherche
+
+La session a un accès web complet : Batman lit les sites des entreprises, la presse locale et les annuaires publics.
+1. **Trouver des signaux récents** avec WebSearch : articles de presse locale, blogs, communiqués (« ouvre ses portes », « nouvelle collection », « inaugure », « lance son application », « vernissage », « marché de Noël »…), en ciblant les derniers mois. Il est possible de lire n'importe quelle page avec `curl -sL -A "Mozilla/5.0" URL`.
+2. **Lire le site du prospect** avec `python3 scripts/prospect/scan_site.py SITE` (depuis /home/user/VILLA-MOTION). Le script renvoie les adresses email **publiées sur le site** (avec la page où elles figurent), les réseaux sociaux, la présence de vidéos sur le site et des phrases récentes (ouverture, lancement, 2026…). Priorité aux adresses de type « domaine » ; la page indiquée va en colonne J.
+3. **Vérifier l'entreprise** (France) avec `python3 scripts/prospect/entreprise.py "Nom" [code_postal]` : active ou non, date de création (une création en 2025-2026 est un bon signal), activité.
+4. Un site sans vidéo (`"videos": false`) mais avec un Instagram ou un TikTok actif est un angle fort : l'entreprise communique déjà, il lui manque la vidéo.
+
 Note chaque prospect de 1 à 5 (colonne L) : 5 = besoin précis et récent trouvé, contact direct ; 3 = bon secteur et contact pro, pas de signal particulier ; 1-2 = douteux. **N'envoie qu'à partir de 3.** Écris en colonne I le fait précis qui justifie le contact (« ouvre un second restaurant à Lyon en décembre », « lance une collection capsule », « vient de lancer son appli »…), avec sa source en colonne J.
 
 Varie les secteurs et les régions : pas plus de 6 emails du même secteur par jour, pas plus de 8 prospects de la même région par jour, pas plus de 2 adresses du même nom de domaine par jour. Cette limite par domaine ne s'applique pas aux messageries publiques (gmail.com, outlook.fr, hotmail.fr, yahoo.fr…) : pour elles, on vérifie seulement que l'adresse exacte n'a jamais été contactée.
@@ -78,14 +86,14 @@ Batman tourne sur le modèle **Sonnet** pour économiser la limite d'utilisation
 ### Session « Préparation » (le soir, vers 20 h 45, aucun envoi)
 
 1. Lire Réglages. Si « Batman actif » ne vaut pas OUI : s'arrêter.
-2. Compter les lignes « À contacter » de l'onglet Batman. Compléter jusqu'à **au moins 30** prospects notés 3 ou plus (une marge au cas où certains seraient écartés le lendemain), recherchés sur le web. Les sites eux-mêmes sont souvent bloqués depuis la session : s'appuyer sur les résultats de recherche, annuaires et comparatifs publics, et noter la source.
+2. Compter les lignes « À contacter » de l'onglet Batman. Compléter jusqu'à **au moins 30** prospects notés 3 ou plus (une marge au cas où certains seraient écartés le lendemain), recherchés sur le web avec les outils décrits dans « Les outils de recherche ». Viser surtout des scores 4 et 5 : un fait récent et vérifiable (lu sur le site ou dans un article) et une adresse publiée par l'entreprise elle-même. Toujours noter la source.
 3. Pour chaque nouveau prospect, remplir A à E, F « À contacter », I (le fait précis qui justifie le contact), J (source), L (score). Vérifier l'absence de doublon (onglets Batman et Prospects, recherche Gmail `in:sent to:ADRESSE`).
 4. **N'envoyer aucun email.** Finir par une ligne : nombre de prospects prêts pour le lendemain, répartition par secteur.
 
 ### Session « Envoi » (10 h 00)
 
 1. Lire Réglages. Si « Batman actif » ne vaut pas OUI : s'arrêter.
-2. Traiter les retours des 7 derniers jours (onglets Batman et Prospects) : réponses (statut « Réponse » + résumé d'une ligne en colonne K), demandes d'arrêt (« STOP »), emails revenus en erreur (`from:mailer-daemon OR from:postmaster`, « Adresse invalide »).
+2. Traiter les retours des 7 derniers jours (onglets Batman et Prospects) : réponses (statut « Réponse » + résumé d'une ligne en colonne K), demandes d'arrêt (« STOP »), emails revenus en erreur (`from:mailer-daemon OR from:postmaster`, « Adresse invalide »). Les accusés de réception, messages d'absence et vérifications anti-spam (Mailinblack…) ne sont pas des réponses : les noter en colonne K sans changer le statut.
 3. Prendre les lignes « À contacter » préparées la veille, les meilleurs scores d'abord, en respectant les quotas par secteur et par domaine. S'il en manque, compléter par quelques recherches rapides.
 4. Entre 10 h 00 et 18 h 00, envoyer 25 emails un par un avec l'outil Gmail d'envoi, en revérifiant juste avant chaque envoi que l'adresse n'a jamais reçu d'email (`in:sent to:ADRESSE`), et mettre à jour chaque ligne juste après l'envoi (F « Envoyé », G date, H objet). En cas d'erreur Gmail : arrêter pour la journée et noter l'erreur en colonne K.
 5. Finir par un résumé court : envoyés, réponses, STOP, adresses invalides, répartition par secteur, et 2 ou 3 exemples d'angles utilisés.
